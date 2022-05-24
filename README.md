@@ -81,3 +81,31 @@ Binance Australia is connected allows users to connect with PayID and _does not_
 ---
 
 You'll notice this _does not_ track staking, liquid staking, airdrops, lockdrops, rebase tokens, LP farming, lending, borrowing, options, and many other areas of defi. Why? I think it's impossible or simply too difficult to track these types of entries manually. Moreover, it's also quite difficult to formalise a standard structure that's both easy to manually input, allows for extensibility, and easy to interpret right now.
+
+## Development
+
+Clone repository:
+
+```bash
+git@github.com:davidvuong/crypto-tax-calc.git
+```
+
+Install dependencies:
+
+```bash
+npm i
+```
+
+Execute `ctc`:
+
+```
+> npm start -- --help
+Usage: ctc.ts [options] <csv_path>
+
+Crypto Tax Calculator - Calculate your tax liability
+
+Options:
+  -V, --version         output the version number
+  -p --period <period>  Financial year period (e.g. 2021-07..2022-06)
+  -h, --help            display help for command
+```
