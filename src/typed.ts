@@ -1,6 +1,6 @@
 import Decimal from 'decimal.js';
 
-export enum TransactionType {
+export enum TrxType {
   TRANSFER = 'TRANSFER',
   TRADE = 'TRADE',
   DEPOSIT = 'DEPOSIT',
@@ -40,18 +40,9 @@ export interface TransferTransaction {
   fee1xFiat: Decimal;
 }
 
-export interface DepositTransaction {
+export interface RampTransaction {
   dt: Date;
-  exchange?: string;
-
-  receiveQty: Decimal;
-  receiveToken: string;
-
-  fee1xFiat?: Decimal;
-}
-
-export interface WithdrawTransaction {
-  dt: Date;
+  type: TrxType.DEPOSIT | TrxType.WITHDRAW;
   exchange?: string;
 
   receiveQty: Decimal;
@@ -63,5 +54,4 @@ export interface WithdrawTransaction {
 export type Transaction =
   | TradeTransaction
   | TransferTransaction
-  | DepositTransaction
-  | WithdrawTransaction;
+  | RampTransaction;
