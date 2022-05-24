@@ -100,12 +100,12 @@ Execute `ctc`:
 
 ```
 > npm start -- --help
-Usage: ctc.ts [options] <csv_path>
+Usage: ctc.ts [options] <trx_path>
 
-Crypto Tax Calculator - Calculate your tax liability
+Crypto Tax Calculator (ctc) - calculate your tax liability
 
 Options:
   -V, --version         output the version number
-  -p --period <period>  Financial year period (e.g. 2021-07..2022-06)
+  -p --period <period>  financial year period (e.g. 2021-07..2022-06)
   -h, --help            display help for command
 ```
