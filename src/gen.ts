@@ -1,6 +1,6 @@
 import Decimal from 'decimal.js';
 import { RampTransaction, Transaction, TrxType } from './typed';
-import { last, random, shuffle } from 'lodash';
+import { last, map, random, shuffle } from 'lodash';
 import { add } from 'date-fns';
 
 export const genOption = <A>(f: () => A): A | undefined =>
@@ -26,9 +26,32 @@ export const genNextDt = (dt: Date): Date =>
     seconds: random(1, 60),
   });
 
-// TODO: TrxTypes should have a weighting. TRADE operations are far more likely to occur than WITHDRAW or DEPOSIT.
-export const genTrxType = (): TrxType =>
-  shuffle(Object.values(TrxType))[0] as TrxType;
+export const genTrxType = (): TrxType => {
+  // NOTE: All weights must add up to 1, otherwise `UnreachableError` will be invoked.
+  const weights: Record<TrxType, Decimal> = {
+    [TrxType.TRADE]: new Decimal(0.65),
+    [TrxType.TRANSFER]: new Decimal(0.15),
+    [TrxType.DEPOSIT]: new Decimal(0.1),
+    [TrxType.WITHDRAW]: new Decimal(0.1),
+  };
+  const position = new Decimal(random(0.0, 1.0));
+
+  const types = Object.keys(weights);
+  let runningPosition = new Decimal(0);
+  for (const type of types) {
+    const weight = weights[type as TrxType];
+
+    runningPosition = runningPosition.add(weight);
+    if (position <= runningPosition) {
+      return type as TrxType;
+    }
+  }
+  throw new Error('UnreachableError. Cannot generate TrxType...');
+};
+
+// genTestTransferAmount - testing transfers
+
+// shuffle(Object.values(TrxType))[0] as TrxType;
 
 export const genSwapPercentage = (): number =>
   shuffle([0.1, 0.2, 0.25, 0.5, 0.75, 1])[0];
@@ -134,6 +157,8 @@ export const genSampleTransactions = (
         // Generate the price of the token we're buying and selling (fiat will be 1 * exchange_rate for fiat currency)
         // Generate a fee percentage. fee = pct * value_of_all_tokens_sold
         // Decide currency used to paid for fee
+        //
+        // Support NFTs (buy/sell when qty is 1)
         break;
       case TrxType.TRANSFER:
         // TODO:
