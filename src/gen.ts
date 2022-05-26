@@ -6,17 +6,18 @@ import { add } from 'date-fns';
 export const genOption = <A>(f: () => A): A | undefined =>
   Math.random() > 0.5 ? f() : undefined;
 
-export const genDepositAmount = (maxDepositAmount = 50_000.0): Decimal =>
-  new Decimal(random(5.0, maxDepositAmount));
+export const genRampAmount = (
+  maxDepositAmount = new Decimal(50_000.0)
+): Decimal => new Decimal(random(5.0, maxDepositAmount.toNumber(), true));
 
 // Fiat currency and their USD->X exchange rate.
 export const genFiatCurrency = (): [string, Decimal] =>
   sample([
-    // ['USD', new Decimal(1)],
-    // ['EUR', new Decimal(random(0.93, 0.933))],
-    // ['JPY', new Decimal(random(110.58, 130.71))],
+    ['USD', new Decimal(1)],
+    ['EUR', new Decimal(random(0.93, 0.933))],
+    ['JPY', new Decimal(random(110.58, 130.71))],
     ['AUD', new Decimal(random(1.36, 1.42))],
-    // ['CAD', new Decimal(random(1.2, 1.39))],
+    ['CAD', new Decimal(random(1.2, 1.39))],
   ] as [string, Decimal][])!;
 
 export const genNextDt = (dt: Date): Date =>
@@ -173,7 +174,7 @@ export const genSampleTransactions = (
   const transactions: Transaction[] = [];
   appendRampTransaction(TrxType.DEPOSIT, transactions, {
     dt: startingDate ?? new Date(),
-    receiveQty: genDepositAmount(),
+    receiveQty: genRampAmount(),
     receiveToken: tracking.fiatCurrency,
   });
 
@@ -183,15 +184,21 @@ export const genSampleTransactions = (
     const nextTrxType = genTrxType();
 
     switch (nextTrxType) {
-      case TrxType.DEPOSIT:
+      case TrxType.DEPOSIT: {
+        appendRampTransaction(TrxType.DEPOSIT, transactions, {
+          dt,
+          receiveQty: genRampAmount(),
+          receiveToken: tracking.fiatCurrency,
+        });
+        break;
+      }
       case TrxType.WITHDRAW: {
-        // Attempting to withdraw when there is no fiat.
-        if (nextTrxType === TrxType.WITHDRAW && tracking.fiat.isZero()) {
+        if (tracking.fiat.isZero()) {
           continue;
         }
         appendRampTransaction(nextTrxType, transactions, {
           dt,
-          receiveQty: Decimal.min(genDepositAmount(), tracking.fiat),
+          receiveQty: genRampAmount(tracking.fiat),
           receiveToken: tracking.fiatCurrency,
         });
         break;
@@ -201,7 +208,7 @@ export const genSampleTransactions = (
         if (tracking.fiat.isZero() && size(tracking.tokens) === 0) {
           appendRampTransaction(TrxType.DEPOSIT, transactions, {
             dt,
-            receiveQty: genDepositAmount(),
+            receiveQty: genRampAmount(),
             receiveToken: tracking.fiatCurrency,
           });
           break;
@@ -295,4 +302,4 @@ export const genSampleTransactions = (
   return transactions;
 };
 
-genSampleTransactions(new Date('2021-01-01'), 5);
+console.log(genSampleTransactions(new Date('2021-01-01'), 10));
