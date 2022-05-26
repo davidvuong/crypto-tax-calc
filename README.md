@@ -23,6 +23,7 @@ dt,exchange,type,receive_qty,receive_token,sent_qty,sent_token,fees,fee_currency
 | :---------------- | :------- | :---------------------------------------------------------------------- |
 | `dt`              | datetime | Date and time this entry occurred                                       |
 | `exchange`        | string   | DEX or CEX it occurred on                                               |
+| `exchange_dest`   | string   | DEX or CEX the transfer                                                 |
 | `receive_qty`     | float    | Amount of tokens received/bought                                        |
 | `receive_token`   | string   | The type of token received ETH/DOT/SOL etc.                             |
 | `sent_qty`        | float    | Amount of tokens sent/sold                                              |
@@ -39,9 +40,9 @@ Depending on the `type` of entry, some columns may or may not be missing and som
 
 ### Example `TRADE`
 
-| dt                  | exchange | type  | receive_qty | receive_token | sent_qty | sent_token | fees | fee_currency | receive_1x_fiat | sent_1x_fiat | fee_1x_fiat |
-| ------------------- | -------- | ----- | ----------- | ------------- | -------- | ---------- | ---- | ------------ | --------------- | ------------ | ----------- |
-| 2022/04/01 15:55:30 | Binance  | TRADE | 3,849.00    | GALA          | 1,000.00 | USDT       | 0.15 | USDT         | 0.35            | 1.33         | 1.33        |
+| dt                  | exchange | exchange_dest | type  | receive_qty | receive_token | sent_qty | sent_token | fees | fee_currency | receive_1x_fiat | sent_1x_fiat | fee_1x_fiat |
+| ------------------- | -------- | ------------- | ----- | ----------- | ------------- | -------- | ---------- | ---- | ------------ | --------------- | ------------ | ----------- |
+| 2022/04/01 15:55:30 | Binance  |               | TRADE | 3,849.00    | GALA          | 1,000.00 | USDT       | 0.15 | USDT         | 0.35            | 1.33         | 1.33        |
 
 In this example, I purchase 3849 GALA tokens for 1000 USDT on Binance at roughly 3:55PM, paying 0.15 USDT fee on the trade. Each GALA is valued at 0.35c AUD and the value of 1 USDT is 1.33 AUD.
 
@@ -53,10 +54,9 @@ Moving tokens between wallets generally _do not_ incur taxes (_not financial adv
 
 However, it's rarely free to move funds around in defi. You almost always have to pay gas. Movement of tokens, specially from centralised exchanges or on the Ethereum network incurs gas and gas fees are tax deductible so I track them to help reduce GCT (capital gains tax).
 
-| dt                  | exchange      | type     | receive_qty | receive_token | sent_qty  | sent_token | fees | fee_currency | receive_1x_fiat | sent_1x_fiat | fee_1x_fiat |
-| ------------------- | ------------- | -------- | ----------- | ------------- | --------- | ---------- | ---- | ------------ | --------------- | ------------ | ----------- |
-| 2022/04/20 17:10:12 | Terra Station | TRANSFER |             |               | 30,000.00 | UST        | 0.02 | UST          |                 | 1.34         | 1.34        |
-| 2022/04/20 17:10:12 | Binance       | TRANSFER | 30,000.00   | UST           |           |            |      |              |                 |              |             |
+| dt                  | exchange      | exchange_dest | type     | receive_qty | receive_token | sent_token | fees | fee_currency | receive_1x_fiat | sent_1x_fiat | fee_1x_fiat |
+| ------------------- | ------------- | ------------- | -------- | ----------- | ------------- | ---------- | ---- | ------------ | --------------- | ------------ | ----------- |
+| 2022/04/20 17:10:12 | Terra Station | Binance       | TRANSFER | 30,000.00   | UST           | 30,000.00  | UST  | 0.02         | UST             | 1.34         | 1.34        |
 
 In this example, 30,000 UST tokens were transferred to a wallet owned by Binance from a wallet viewed through Terra Station. The value of one UST is 1.34 AUD and I paid 0.02 UST in gas fees to make the transfer which took place around 5:10PM.
 

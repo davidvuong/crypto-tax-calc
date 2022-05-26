@@ -1,5 +1,12 @@
 import Decimal from 'decimal.js';
-import { RampTransaction, Transaction, TrxType, RampTrxType } from './typed';
+import {
+  RampTransaction,
+  Transaction,
+  TrxType,
+  RampTrxType,
+  TransferTransaction,
+  TradeTransaction,
+} from './typed';
 import { last, sample, random, shuffle, take, size, clone } from 'lodash';
 import { add } from 'date-fns';
 
@@ -48,6 +55,8 @@ export const genTrxType = (): TrxType => {
 };
 
 // genTestTransferAmount - testing transfers
+
+export const genTransferPercentage = (): number => sample([0.5, 0.75, 1])!;
 
 export const genSwapPercentage = (): number =>
   sample([0.1, 0.2, 0.25, 0.5, 0.75, 1])!;
@@ -263,8 +272,9 @@ export const genSampleTransactions = (
         }
 
         // TODO: Support NFTs
-        transactions.push({
+        const transaction: TradeTransaction = {
           dt,
+          type: TrxType.TRADE,
           exchange: genOption(genExchange),
 
           receiveQty,
@@ -278,17 +288,41 @@ export const genSampleTransactions = (
           fees,
           feeCurrency,
           fee1xFiat,
-        });
-
+        };
+        transactions.push(transaction);
         break;
       }
       case TrxType.TRANSFER: {
-        // TODO:
-        //
-        // Examine all existing tokens held
-        // Randomly choose a token to be transferred
-        // Generate price for tokens to be transferred
-        // Generate fee percentage (same as trade)
+        if (size(tracking.tokens) === 0) {
+          continue;
+        }
+
+        const transferTokenSymbol = sample(Object.keys(tracking.tokens))!;
+        const transferToken = tracking.tokens[transferTokenSymbol];
+        const transferPercentage = genTransferPercentage();
+        const transferAmount = transferToken.qty.mul(transferPercentage);
+
+        const fees = transferAmount.mul(genFeePercentage());
+        const transferReceiveAmount = transferAmount.sub(fees);
+
+        transferToken.lastPrice = transferToken.lastPrice.mul(
+          genNextTokenPricePercentageDelta()
+        );
+        transferToken.qty = transferToken.qty.sub(fees);
+
+        const transaction: TransferTransaction = {
+          dt,
+          type: TrxType.TRANSFER,
+          fromExchange: genOption(genExchange),
+          toExchange: genOption(genExchange),
+          fromQty: transferAmount,
+          toQty: transferReceiveAmount,
+          token: transferTokenSymbol,
+          token1xFiat: transferToken.lastPrice,
+          fees,
+          fee1xFiat: transferToken.lastPrice,
+        };
+        transactions.push(transaction);
         break;
       }
     }
@@ -301,5 +335,3 @@ export const genSampleTransactions = (
 
   return transactions;
 };
-
-console.log(genSampleTransactions(new Date('2021-01-01'), 10));

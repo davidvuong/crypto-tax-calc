@@ -11,6 +11,7 @@ export type RampTrxType = TrxType.DEPOSIT | TrxType.WITHDRAW;
 
 export interface TradeTransaction {
   dt: Date;
+  type: TrxType.TRADE;
   exchange?: string;
 
   receiveQty: Decimal;
@@ -28,17 +29,17 @@ export interface TradeTransaction {
 
 export interface TransferTransaction {
   dt: Date;
+  type: TrxType.TRANSFER;
 
   fromExchange?: string;
   fromQty: Decimal;
-  fromToken: string;
-  from1xFiat: Decimal;
-
   toExchange?: string;
   toQty: Decimal;
-  toToken: string;
-  to1xFiat: Decimal;
 
+  token: string;
+  token1xFiat: Decimal;
+
+  fees: Decimal;
   fee1xFiat: Decimal;
 }
 
