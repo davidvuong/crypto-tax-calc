@@ -7,6 +7,8 @@ export enum TrxType {
   WITHDRAW = 'WITHDRAW',
 }
 
+export type RampTrxType = TrxType.DEPOSIT | TrxType.WITHDRAW;
+
 export interface TradeTransaction {
   dt: Date;
   exchange?: string;
