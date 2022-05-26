@@ -1,17 +1,6 @@
 import Decimal from 'decimal.js';
 import { RampTransaction, Transaction, TrxType, RampTrxType } from './typed';
-import {
-  last,
-  sample,
-  random,
-  shuffle,
-  take,
-  size,
-  times,
-  groupBy,
-  map,
-  clone,
-} from 'lodash';
+import { last, sample, random, shuffle, take, size, clone } from 'lodash';
 import { add } from 'date-fns';
 
 export const genOption = <A>(f: () => A): A | undefined =>
@@ -92,7 +81,19 @@ export const genDex = (): string =>
     'PRISM Swap',
   ])!;
 
-export const genToken = (excludeToken?: string): string => {
+export const genToken = (
+  excludeToken?: string,
+  capcityOptions?: {
+    tokens: string[];
+    maxOperatingTokens: number;
+  }
+): string => {
+  if (
+    capcityOptions &&
+    capcityOptions.tokens.length >= capcityOptions.maxOperatingTokens
+  ) {
+    return sample(capcityOptions.tokens)!;
+  }
   const token = take(
     shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')),
     random(3, 5)
@@ -100,7 +101,7 @@ export const genToken = (excludeToken?: string): string => {
   if (token !== excludeToken) {
     return token;
   }
-  return genToken(excludeToken);
+  return genToken(excludeToken, capcityOptions);
 };
 
 export const genStableToken = (): string =>
@@ -116,7 +117,8 @@ export const genExchange = (): string =>
 
 export const genSampleTransactions = (
   startingDate?: Date,
-  maxTransactionsToGenerate?: number
+  maxTransactionsToGenerate?: number,
+  maxOperatingTokens = 10
 ): Transaction[] => {
   // Helpers //
 
@@ -175,22 +177,10 @@ export const genSampleTransactions = (
     receiveToken: tracking.fiatCurrency,
   });
 
-  console.log('-------------------------------------------DEPOSIT');
-  console.log(TrxType.DEPOSIT);
-  console.log(tracking);
-  console.log(last(transactions));
-  console.log('--');
-  console.log();
-
   // Begin generating N transactions (-1 to account for initial deposit on-ramp).
   while (true) {
     const dt = genNextDt(last(transactions)!.dt);
     const nextTrxType = genTrxType();
-
-    console.log('-------------------------------------------START');
-    console.log(nextTrxType);
-    console.log('BEFORE...');
-    console.log(tracking);
 
     switch (nextTrxType) {
       case TrxType.DEPOSIT:
@@ -238,14 +228,15 @@ export const genSampleTransactions = (
         const receiveToken =
           sentToken === tracking.fiatCurrency
             ? genStableToken()
-            : genToken(sentToken);
-
-        // TODO: Check if this new token already exists and if so, grab the previous token price.
-        // TODO: Probability of swapping between tokens we already have.
-        // Cap the number of tokens we work with to N and then once reached, trades are between existing tokens.
-        const receive1xFiat = (
-          sentToken === tracking.fiatCurrency ? new Decimal(1) : genTokenPrice()
-        ).mul(tracking.fiatExchangeRate);
+            : genToken(sentToken, {
+                tokens: Object.keys(tracking.tokens),
+                maxOperatingTokens,
+              });
+        const receive1xFiat =
+          sentToken === tracking.fiatCurrency
+            ? new Decimal(1).mul(tracking.fiatExchangeRate)
+            : tracking.tokens[receiveToken]?.lastPrice ??
+              genTokenPrice().mul(tracking.fiatExchangeRate);
         let receiveQty = sentQty.mul(sent1xFiat).div(receive1xFiat);
 
         // Fees
@@ -295,12 +286,6 @@ export const genSampleTransactions = (
       }
     }
 
-    console.log('AFTER...');
-    console.log(tracking);
-    console.log(last(transactions));
-    console.log('--');
-    console.log();
-
     tracking.transactionsGenerated += 1;
     if (tracking.transactionsGenerated === tracking.totalTransactionsRequired) {
       break;
@@ -311,6 +296,3 @@ export const genSampleTransactions = (
 };
 
 genSampleTransactions(new Date('2021-01-01'), 5);
-
-// const trxs = times(1000, genTrxType);
-// console.log(map(groupBy(trxs), (value, key) => [key, value.length]));
