@@ -22,6 +22,7 @@ dt,exchange,type,receive_qty,receive_token,sent_qty,sent_token,fees,fee_currency
 | column            | type     | description                                                             |
 | :---------------- | :------- | :---------------------------------------------------------------------- |
 | `dt`              | datetime | Date and time this entry occurred                                       |
+| `type`            | string   | Type of transaction see above                                           |
 | `exchange`        | string   | DEX or CEX it occurred on                                               |
 | `exchange_dest`   | string   | DEX or CEX the transfer                                                 |
 | `receive_qty`     | float    | Amount of tokens received/bought                                        |

@@ -6,9 +6,20 @@ import {
   RampTrxType,
   TransferTransaction,
   TradeTransaction,
+  TransactionCsv,
 } from './typed';
-import { last, sample, random, shuffle, take, size, clone } from 'lodash';
+import {
+  last,
+  sample,
+  random,
+  shuffle,
+  take,
+  size,
+  clone,
+  toArray,
+} from 'lodash';
 import { add } from 'date-fns';
+import { stringify } from 'csv/sync';
 
 export const genOption = <A>(f: () => A): A | undefined =>
   Math.random() > 0.5 ? f() : undefined;
@@ -335,3 +346,88 @@ export const genSampleTransactions = (
 
   return transactions;
 };
+
+export const genCsv = (trxs?: Transaction[]): string => {
+  const transactions = trxs ?? genSampleTransactions(undefined, 10);
+
+  const columns: (keyof TransactionCsv)[] = [
+    'dt',
+    'type',
+    'exchange',
+    'exchange_dest',
+    'receive_qty',
+    'receive_token',
+    'sent_qty',
+    'sent_token',
+    'fees',
+    'fees_currency',
+    'receive_1x_fiat',
+    'sent_1x_fiat',
+    'fee_1x_fiat',
+  ];
+
+  const list: TransactionCsv[] = transactions.map((t) => {
+    switch (t.type) {
+      case TrxType.DEPOSIT: {
+        const row: TransactionCsv = {
+          dt: t.dt,
+          type: t.type,
+          exchange: t.exchange,
+          receive_qty: t.receiveQty.toString(),
+          receive_token: t.receiveToken,
+        };
+        return row;
+      }
+      case TrxType.WITHDRAW: {
+        const row: TransactionCsv = {
+          dt: t.dt,
+          type: t.type,
+          exchange: t.exchange,
+          receive_qty: t.receiveQty.toString(),
+          receive_token: t.receiveToken,
+        };
+        return row;
+      }
+      case TrxType.TRANSFER: {
+        const row: TransactionCsv = {
+          dt: t.dt,
+          type: t.type,
+          exchange: t.fromExchange,
+          exchange_dest: t.toExchange,
+          receive_qty: t.toQty.toString(),
+          receive_token: t.token,
+          sent_qty: t.fromQty.toString(),
+          sent_token: t.token,
+          fees: t.fees.toString(),
+          fees_currency: t.token,
+          receive_1x_fiat: t.token1xFiat.toString(),
+          sent_1x_fiat: t.token1xFiat.toString(),
+          fee_1x_fiat: t.token1xFiat.toString(),
+        };
+        return row;
+      }
+      case TrxType.TRADE: {
+        const row: TransactionCsv = {
+          dt: t.dt,
+          type: t.type,
+          exchange: t.exchange,
+          exchange_dest: undefined,
+          receive_qty: t.receiveQty.toString(),
+          receive_token: t.receiveToken,
+          sent_qty: t.sentQty.toString(),
+          sent_token: t.sentToken,
+          fees: t.fees.toString(),
+          fees_currency: t.feeCurrency,
+          receive_1x_fiat: t.receive1xFiat.toString(),
+          sent_1x_fiat: t.sent1xFiat.toString(),
+          fee_1x_fiat: t.fee1xFiat.toString(),
+        };
+        return row;
+      }
+    }
+  });
+
+  const csvString = stringify(list, { columns, header: true });
+  return csvString;
+};
+genCsv();

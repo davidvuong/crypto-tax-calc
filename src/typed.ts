@@ -58,3 +58,19 @@ export type Transaction =
   | TradeTransaction
   | TransferTransaction
   | RampTransaction;
+
+export interface TransactionCsv {
+  dt: Date;
+  type: TrxType;
+  exchange?: string;
+  exchange_dest?: string;
+  receive_qty?: string;
+  receive_token?: string;
+  sent_qty?: string;
+  sent_token?: string;
+  fees?: string;
+  fees_currency?: string;
+  receive_1x_fiat?: string;
+  sent_1x_fiat?: string;
+  fee_1x_fiat?: string;
+}
