@@ -424,9 +424,3 @@ export const genCsv = (trxs?: Transaction[]): string => {
   const csvString = stringify(list, { columns, header: true });
   return csvString;
 };
-
-const csv = genCsv();
-console.log(csv);
-
-const transactions = csvToTransactions(csv);
-console.log(transactions);
