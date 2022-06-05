@@ -1,7 +1,5 @@
 import Decimal from 'decimal.js';
-import Joi, { validateSchema } from './validator';
-import { parse } from 'csv/sync';
-import { isNil, pickBy } from 'lodash';
+import Joi from './validator';
 
 export enum TrxType {
   TRANSFER = 'TRANSFER',
@@ -39,17 +37,17 @@ export const TradeTransactionSchema = Joi.object({
   type: Joi.string().valid(TrxType.TRADE).required(),
   exchange: Joi.string(),
 
-  receiveQty: Joi.string().required(),
+  receiveQty: Joi.bigdecimal().required(),
   receiveToken: Joi.string().required(),
-  receive1xFiat: Joi.string().required(),
+  receive1xFiat: Joi.bigdecimal().required(),
 
-  sentQty: Joi.string().required(),
+  sentQty: Joi.bigdecimal().required(),
   sentToken: Joi.string().required(),
-  sent1xFiat: Joi.string().required(),
+  sent1xFiat: Joi.bigdecimal().required(),
 
-  fees: Joi.string().required(),
+  fees: Joi.bigdecimal().required(),
   feeCurrency: Joi.string().required(),
-  fee1xFiat: Joi.string().required(),
+  fee1xFiat: Joi.bigdecimal().required(),
 });
 
 export interface TransferTransaction {
@@ -100,10 +98,10 @@ export const RampTransactionSchema = Joi.object({
   type: Joi.string().valid(TrxType.DEPOSIT, TrxType.WITHDRAW).required(),
   exchange: Joi.string(),
 
-  receiveQty: Joi.string().required(),
+  receiveQty: Joi.bigdecimal().required(),
   receiveToken: Joi.string().required(),
 
-  fee1xFiat: Joi.string(),
+  fee1xFiat: Joi.bigdecimal(),
 });
 
 export type Transaction =
