@@ -34,7 +34,7 @@ export const Joi: BaseJoi.Root & { [name](): DecimalSchema } = BaseJoi.extend(
       coerce(value, helpers): CoerceResult {
         // TODO: Error mapping following joi conventions
         // TODO: add extra validation rules
-        const result = new Decimal(value);
+        const result = value instanceof Decimal ? value : new Decimal(value);
         if (result.isNaN()) {
           return helpers.error(DecimalSchemaErrorCode.NUMBER);
         }
