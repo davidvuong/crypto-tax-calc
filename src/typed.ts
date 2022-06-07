@@ -1,4 +1,5 @@
 import Decimal from 'decimal.js';
+import Joi from './validator';
 
 export enum TrxType {
   TRANSFER = 'TRANSFER',
@@ -6,6 +7,10 @@ export enum TrxType {
   DEPOSIT = 'DEPOSIT',
   WITHDRAW = 'WITHDRAW',
 }
+
+export const TrxTypeSchema = Joi.string()
+  .valid(...Object.values(TrxType))
+  .empty('');
 
 export type RampTrxType = TrxType.DEPOSIT | TrxType.WITHDRAW;
 
@@ -27,6 +32,24 @@ export interface TradeTransaction {
   fee1xFiat: Decimal;
 }
 
+export const TradeTransactionSchema = Joi.object({
+  dt: Joi.date().required(),
+  type: Joi.string().valid(TrxType.TRADE).required(),
+  exchange: Joi.string(),
+
+  receiveQty: Joi.bigdecimal().required(),
+  receiveToken: Joi.string().required(),
+  receive1xFiat: Joi.bigdecimal().required(),
+
+  sentQty: Joi.bigdecimal().required(),
+  sentToken: Joi.string().required(),
+  sent1xFiat: Joi.bigdecimal().required(),
+
+  fees: Joi.bigdecimal().required(),
+  feeCurrency: Joi.string().required(),
+  fee1xFiat: Joi.bigdecimal().required(),
+});
+
 export interface TransferTransaction {
   dt: Date;
   type: TrxType.TRANSFER;
@@ -43,6 +66,22 @@ export interface TransferTransaction {
   fee1xFiat: Decimal;
 }
 
+export const TransferTransactionSchema = Joi.object({
+  dt: Joi.date().required(),
+  type: Joi.string().valid(TrxType.TRANSFER).required(),
+
+  fromExchange: Joi.string(),
+  fromQty: Joi.bigdecimal().required(),
+  toExchange: Joi.string(),
+  toQty: Joi.bigdecimal().required(),
+
+  token: Joi.string().required(),
+  token1xFiat: Joi.bigdecimal().required(),
+
+  fees: Joi.bigdecimal().required(),
+  fee1xFiat: Joi.bigdecimal().required(),
+});
+
 export interface RampTransaction {
   dt: Date;
   type: TrxType.DEPOSIT | TrxType.WITHDRAW;
@@ -54,7 +93,34 @@ export interface RampTransaction {
   fee1xFiat?: Decimal;
 }
 
+export const RampTransactionSchema = Joi.object({
+  dt: Joi.date().required(),
+  type: Joi.string().valid(TrxType.DEPOSIT, TrxType.WITHDRAW).required(),
+  exchange: Joi.string(),
+
+  receiveQty: Joi.bigdecimal().required(),
+  receiveToken: Joi.string().required(),
+
+  fee1xFiat: Joi.bigdecimal(),
+});
+
 export type Transaction =
   | TradeTransaction
   | TransferTransaction
   | RampTransaction;
+
+export interface TransactionCsvRow {
+  dt: Date;
+  type: TrxType;
+  exchange?: string;
+  exchange_dest?: string;
+  receive_qty?: string;
+  receive_token?: string;
+  sent_qty?: string;
+  sent_token?: string;
+  fees?: string;
+  fees_currency?: string;
+  receive_1x_fiat?: string;
+  sent_1x_fiat?: string;
+  fee_1x_fiat?: string;
+}
