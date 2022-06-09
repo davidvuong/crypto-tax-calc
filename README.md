@@ -1,5 +1,7 @@
 # crypto-tax-calc
 
+_This is still WIP_
+
 **Welcome to crypto-tax-calc!**
 
 Manually track of your trades, swaps, and transfers and use `ctc.ts` to quickly find out what your tax liability is for any financial year.
